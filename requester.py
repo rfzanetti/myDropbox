@@ -11,7 +11,7 @@ def downloadFileFromS3(filename):
 def getServerFiles():
 	response = requests.get('http://127.0.0.1:5000/files')
 
-	return response.text.split(';')[:-1]
+	return response.text.split('\n')
 
 def getNewFiles():
 	thisFiles = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -26,6 +26,20 @@ def getNewFiles():
 
 	return newFiles
 
+
+def getDeletedFiles():
+	thisFiles = [f for f in os.listdir('.') if os.path.isfile(f)]
+	serverFiles = getServerFiles()
+
+	deletedFiles = []
+
+	for thisFile in thisFiles:
+		if thisFile not in serverFiles:
+			if thisFile[-3:] == 'txt':
+				deletedFiles.append(thisFile)
+
+	return deletedFiles
+
 if __name__ == '__main__':
 	while True:
 		newFiles = getNewFiles()
@@ -33,6 +47,10 @@ if __name__ == '__main__':
 		if len(newFiles) > 0:
 			for f in newFiles:
 				downloadFileFromS3(f)
+
+		if len(deletedFiles) > 0:
+			for f in deletedFiles:
+				os.unlink(f)
 
 		time.sleep(5)
 

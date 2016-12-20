@@ -32,11 +32,13 @@ class MyHandler(PatternMatchingEventHandler):
 		self.process(event)
 		self.S3Controller.uploadFileToS3(event.src_path[2:])
 		testeReq = {'filename': event.src_path[2:]}
-		r = requests.post('http://127.0.0.1:5000/counter', data=testeReq)
+		r = requests.post('http://127.0.0.1:5000/add', data=testeReq)
 
 	def on_deleted(self, event):
 		self.process(event)
 		self.S3Controller.deleteFileFromS3(event.src_path[2:])
+		testeReq = {'filename': event.src_path[2:]}
+		r = requests.post('http://127.0.0.1:5000/remove', data=testeReq)
 
 if __name__ == '__main__':
 	args = sys.argv[1:]
