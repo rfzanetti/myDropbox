@@ -1,4 +1,4 @@
-import os
+import os, boto3
 from flask import Flask, request
 
 app = Flask(__name__)
@@ -6,6 +6,9 @@ app = Flask(__name__)
 fileList = []
 
 def loadControlFile():
+	s3 = boto3.resource('s3')
+	s3.Bucket('mydropbox.sd').download_file('fileList.ctl', 'fileList.ctl')
+
 	files = [line.rstrip('\n') for line in open('fileList.ctl')]
 	for file in files:
 		fileList.append(file)
@@ -22,6 +25,12 @@ def saveControlFile():
 	fileContent = fileContent[:-1]
 
 	ctlfile.write(fileContent)
+
+	ctlfile.close()
+
+	s3 = boto3.resource('s3')
+	file = open('fileList.ctl', 'r')
+	s3.Bucket('mydropbox.sd').put_object(Key='fileList.ctl', Body=file)
 
 @app.route('/')
 def hello_world():
